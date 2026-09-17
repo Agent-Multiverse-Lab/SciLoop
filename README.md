@@ -4,8 +4,10 @@
 
 # SciLoop
 
-[English](README.md) | [简体中文](README.zh-CN.md)
-
 SciLoop turns papers into working implementations through architecture design, coding, data validation, experiments, result analysis, and iterative training.
 
+Built as a secure Electron desktop application with TypeScript in every process, React in the renderer, and Radix Icons for interface iconography.
+
 [Development: stack, structure, and setup](docs/DEVELOPMENT.md)
+
+[Interface design](docs/design/ui/README.md)
