@@ -1,39 +1,41 @@
-import { app, BrowserWindow, net, protocol, session } from "electron";
-import { dirname, isAbsolute, relative, resolve, join } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { app, type BrowserWindow } from "electron";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { registerIpcHandlers } from "./ipc/register.js";
+import { registerRendererProtocol, registerRendererScheme } from "./protocol.js";
+import { lockDownPermissions } from "./security.js";
+import { createMainWindow } from "./window.js";
 
-const directory = dirname(fileURLToPath(import.meta.url));
-protocol.registerSchemesAsPrivileged([{ scheme: "sciloop", privileges: { standard: true, secure: true, supportFetchAPI: true } }]);
-app.setName("SciLoop");
+const currentDirectory = dirname(fileURLToPath(import.meta.url));
 let mainWindow: BrowserWindow | null = null;
 
-function createWindow(): void {
-  mainWindow = new BrowserWindow({
-    width: 1120, height: 760, minWidth: 640, minHeight: 480, title: "SciLoop", backgroundColor: "#f7f9fa",
-    webPreferences: { preload: join(directory, "preload.cjs"), contextIsolation: true, sandbox: true, nodeIntegration: false }
+registerRendererScheme();
+app.setName("SciLoop");
+
+async function bootstrap(): Promise<void> {
+  registerIpcHandlers();
+  registerRendererProtocol(resolve(currentDirectory, "../renderer"));
+  lockDownPermissions();
+
+  mainWindow = createMainWindow();
+  mainWindow.on("closed", () => {
+    mainWindow = null;
   });
-  mainWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
-  mainWindow.webContents.on("will-navigate", event => event.preventDefault());
-  mainWindow.on("closed", () => { mainWindow = null; });
-  void mainWindow.loadURL("sciloop://app/index.html");
+
+  app.on("activate", () => {
+    if (mainWindow === null) {
+      mainWindow = createMainWindow();
+    }
+  });
 }
 
-app.whenReady().then(() => {
-  const rendererRoot = resolve(directory, "../renderer");
-  protocol.handle("sciloop", request => {
-    const url = new URL(request.url);
-    if (url.hostname !== "app") return new Response("Not found", { status: 404 });
-    let pathname: string;
-    try { pathname = decodeURIComponent(url.pathname); }
-    catch { return new Response("Invalid path", { status: 400 }); }
-    const file = resolve(rendererRoot, `.${pathname}`);
-    const child = relative(rendererRoot, file);
-    if (child.startsWith("..") || isAbsolute(child)) return new Response("Forbidden", { status: 403 });
-    return net.fetch(pathToFileURL(file).toString());
-  });
-  session.defaultSession.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
-  session.defaultSession.setPermissionCheckHandler(() => false);
-  createWindow();
-  app.on("activate", () => { if (!mainWindow) createWindow(); });
-}).catch(error => { console.error(error); app.exit(1); });
-app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(); });
+app.whenReady().then(bootstrap).catch((error: unknown) => {
+  console.error("Failed to start SciLoop", error);
+  app.exit(1);
+});
+
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
+  }
+});

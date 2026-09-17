@@ -1,10 +1,68 @@
-:root { font-family: ui-sans-serif, system-ui, sans-serif; color: #17333b; background: #f7f9fa; }
-* { box-sizing: border-box; }
-body { margin: 0; }
-.shell { min-height: 100vh; }
-header { display: flex; align-items: center; gap: 12px; padding: 24px 32px; border-bottom: 1px solid #e2e9eb; font-size: 22px; font-weight: 600; }
-header img { width: 38px; height: 38px; border-radius: 10px; }
-section { max-width: 800px; margin: 15vh auto; padding: 32px; }
-.eyebrow { color: #16836d; font-size: 12px; letter-spacing: 2px; }
-h1 { font-size: clamp(32px, 6vw, 56px); font-weight: 500; letter-spacing: -2px; }
-.description { color: #607981; font-size: 18px; line-height: 1.8; }
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Aptos", "Segoe UI Variable", "Microsoft YaHei UI", sans-serif;
+  --font-mono: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+
+  --color-surface: #ffffff;
+  --color-surface-subtle: #f7f7f7;
+  --color-surface-hover: #eeeeee;
+  --color-surface-active: #e2e2e2;
+  --color-ink: #111111;
+  --color-ink-soft: #2f2f2f;
+  --color-ink-muted: #666666;
+  --color-ink-faint: #909090;
+  --color-line: #dedede;
+  --color-line-strong: #c9c9c9;
+
+  --radius-control: 4px;
+  --radius-input: 6px;
+  --shadow-user-message: 0 2px 8px rgb(17 17 17 / 8%);
+}
+
+:root {
+  color: var(--color-ink);
+  background: var(--color-surface);
+  font-family: var(--font-sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-width: 320px;
+  min-height: 100%;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+}
+
+button,
+textarea {
+  color: inherit;
+  font: inherit;
+}
+
+::selection {
+  color: var(--color-ink);
+  background: var(--color-surface-active);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
