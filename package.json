@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "npm run build -w @sciloop/core && npm run build -w @sciloop/harness && npm run build -w @sciloop/desktop",
-    "typecheck": "npm run build -w @sciloop/core && npm run typecheck -w @sciloop/harness && npm run typecheck -w @sciloop/desktop",
+    "typecheck": "npm run build -w @sciloop/core && npm run build -w @sciloop/harness && npm run typecheck -w @sciloop/desktop",
     "start": "npm run build && npm run start -w @sciloop/desktop",
     "dev": "npm start",
     "dev:web": "npm run dev:web -w @sciloop/desktop"
